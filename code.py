@@ -9,28 +9,21 @@ class Calculator(tk.Tk):
         self.resizable(False, False)
         self._build_ui()
         self._bind_keys()
-
-        # Expression state
         self.expression = ""
 
     def _build_ui(self):
-        # Fonts
         self.display_font = font.Font(family="Consolas", size=24, weight="bold")
         self.button_font = font.Font(family="Segoe UI", size=14)
-        self.button_active_bg = "#d0d7de"  # Light gray button press effect
-        self.button_bg = "#ffffff"          # White button background
-        self.button_fg = "#24292e"          # Dark text color
-        self.accent_fg = "#0366d6"          # Blue accent (buttons selected, etc.)
-
-        # Display Entry (readonly)
+        self.button_active_bg = "#d0d7de"  
+        self.button_bg = "#ffffff"          
+        self.button_fg = "#24292e"           
+        self.accent_fg = "#0366d6"         
         self.display_var = tk.StringVar()
         self.display = tk.Entry(self, textvariable=self.display_var, font=self.display_font,
                                 bg="#ffffff", fg="#24292e", bd=2, relief="sunken",
                                 justify="right", state="readonly", readonlybackground="#ffffff",
                                 highlightthickness=0, insertbackground="#24292e")
         self.display.grid(row=0, column=0, columnspan=4, ipadx=10, ipady=15, padx=16, pady=(16,8), sticky="ew")
-
-        # Buttons layout - 4 columns, multiple rows
         buttons = [
             ("C", 1, 0, self._clear), 
             ("±", 1, 1, self._toggle_sign), 
@@ -65,14 +58,13 @@ class Calculator(tk.Tk):
             btn.bind("<Enter>", lambda e, b=btn: b.config(bg=self.button_active_bg))
             btn.bind("<Leave>", lambda e, b=btn: b.config(bg=self.button_bg))
 
-        # Grid weight for responsiveness
         for i in range(6):
             self.rowconfigure(i, weight=1)
         for j in range(4):
             self.columnconfigure(j, weight=1)
 
     def _bind_keys(self):
-        # Bind keyboard keys for digits and operators
+  
         for key in "0123456789":
             self.bind(key, self._key_append)
         for key in "+-*/":
@@ -92,19 +84,19 @@ class Calculator(tk.Tk):
             self._append_decimal()
 
     def _append_char(self, char):
-        # Append digit char
+ 
         self.expression += char
         self._update_display()
 
     def _append_operator(self, operator):
         if not self.expression:
-            # Prevent starting expression with operator except -
+            
             if operator == "-":
                 self.expression += operator
                 self._update_display()
             return
 
-        # Prevent two operators in succession, replace last if exists
+        
         if self.expression[-1] in "+-*/":
             self.expression = self.expression[:-1] + operator
         else:
@@ -112,7 +104,7 @@ class Calculator(tk.Tk):
         self._update_display()
 
     def _append_decimal(self):
-        # Append decimal point if valid
+        
         parts = self._split_expression()
         if "." in parts[-1]:
             return  # Ignore if current number already has decimal
@@ -120,7 +112,7 @@ class Calculator(tk.Tk):
         self._update_display()
 
     def _split_expression(self):
-        # Split expression by operators to check last number
+        
         import re
         parts = re.split(r"[+\-*/]", self.expression)
         return parts
@@ -134,7 +126,7 @@ class Calculator(tk.Tk):
         self._update_display()
 
     def _toggle_sign(self):
-        # Toggle sign of the last number in expression
+       
         import re
         parts = list(re.finditer(r"(\d*\.?\d+)", self.expression))
         if not parts:
@@ -145,14 +137,14 @@ class Calculator(tk.Tk):
         try:
             number_value = float(number_text)
             toggled = -number_value
-            # Replace in expression
+           
             self.expression = self.expression[:start] + str(toggled) + self.expression[end:]
             self._update_display()
         except ValueError:
             pass
 
     def _percent(self):
-        # Convert last number to percentage
+        
         import re
         parts = list(re.finditer(r"(\d*\.?\d+)", self.expression))
         if not parts:
@@ -170,13 +162,12 @@ class Calculator(tk.Tk):
 
     def _calculate(self):
         try:
-            # Evaluate safely using eval with restricted globals and locals
+            
             expression_eval = self.expression.replace("÷", "/").replace("×", "*")
-            # Reject unsafe characters - only digits, ., +, -, *, /
+            
             if not all(c in "0123456789+-*/.() " for c in expression_eval):
                 raise ValueError("Invalid character")
-            result = eval(expression_eval, {"__builtins__": {}}, {})
-            # Format result: if integer, show int, else float to 10 decimals max
+            result = eval(expression_eval, {"__builtins__": {}}, {}) 
             if isinstance(result, float):
                 if result.is_integer():
                     result = int(result)
